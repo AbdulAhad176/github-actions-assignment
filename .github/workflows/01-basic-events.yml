@@ -1,0 +1,62 @@
+name: 01 - Basic Events
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+
+  pull_request:
+    branches:
+      - main
+      - dev
+
+  workflow_dispatch:
+    inputs:
+      name:
+        description: Your name
+        required: true
+        type: string
+      greeting:
+        description: Your greeting
+        required: true
+        default: Hello
+        type: string
+      data:
+        description: A short practice message
+        required: true
+        default: Learning GitHub Actions
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  demonstrate-events:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Show workflow information
+        env:
+          STUDENT: ${{ github.actor }}
+          EVENT: ${{ github.event_name }}
+          REPOSITORY: ${{ github.repository }}
+          SYSTEM: ${{ runner.os }}
+        run: |
+          echo "Student GitHub username: $STUDENT"
+          echo "Event: $EVENT"
+          echo "Repository: $REPOSITORY"
+          echo "Runner operating system: $SYSTEM"
+
+      - name: Show manual inputs
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          PERSON_NAME: ${{ inputs.name }}
+          GREETING: ${{ inputs.greeting }}
+          MESSAGE: ${{ inputs.data }}
+        run: |
+          printf '%s, %s!\n' "$GREETING" "$PERSON_NAME"
+          printf 'Data: %s\n' "$MESSAGE"
+
+      - name: Confirm completion
+        run: echo "The workflow completed successfully."

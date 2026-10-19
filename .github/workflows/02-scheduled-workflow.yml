@@ -1,0 +1,27 @@
+name: 02 - Scheduled Workflow
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  scheduled-job:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Show scheduled run information
+        env:
+          STUDENT: ${{ github.actor }}
+          EVENT: ${{ github.event_name }}
+          REPOSITORY: ${{ github.repository }}
+          BRANCH: ${{ github.ref }}
+        run: |
+          echo "Student GitHub username: $STUDENT"
+          echo "Event: $EVENT"
+          echo "Repository: $REPOSITORY"
+          echo "Branch: $BRANCH"
+          date -u
+          echo "Scheduled workflow completed successfully."

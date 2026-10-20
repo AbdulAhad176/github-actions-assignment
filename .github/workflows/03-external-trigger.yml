@@ -1,0 +1,27 @@
+name: 03 - External Trigger
+
+on:
+  repository_dispatch:
+    types:
+      - custom-webhook
+
+permissions:
+  contents: read
+
+jobs:
+  external-trigger-job:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Show external event information
+        env:
+          STUDENT: ${{ github.actor }}
+          EVENT: ${{ github.event_name }}
+          EVENT_TYPE: ${{ github.event.action }}
+          MESSAGE: ${{ github.event.client_payload.message }}
+        run: |
+          echo "Student GitHub username: $STUDENT"
+          echo "Event: $EVENT"
+          echo "Event type: $EVENT_TYPE"
+          printf 'Message: %s\n' "$MESSAGE"
+          echo "External trigger completed successfully."

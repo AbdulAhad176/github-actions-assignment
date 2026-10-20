@@ -1,0 +1,57 @@
+name: 06 - Multi OS Runners
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows-job:
+    name: Windows PowerShell and Chocolatey
+    runs-on: windows-latest
+
+    steps:
+      - name: Show Windows information
+        shell: pwsh
+        env:
+          STUDENT: ${{ github.actor }}
+        run: |
+          Write-Output "Student: $env:STUDENT"
+          Get-CimInstance Win32_OperatingSystem |
+            Select-Object Caption, Version, OSArchitecture
+          $PSVersionTable
+
+      - name: Run Chocolatey command
+        shell: pwsh
+        run: |
+          choco --version
+          Write-Output "Chocolatey command completed."
+
+      - name: Run a PowerShell script
+        shell: pwsh
+        run: |
+          $message = "Hello from the Windows runner!"
+          Write-Output $message
+
+  macos-job:
+    name: macOS Swift Compilation
+    runs-on: macos-latest
+
+    steps:
+      - name: Show macOS information
+        env:
+          STUDENT: ${{ github.actor }}
+        run: |
+          echo "Student: $STUDENT"
+          sw_vers
+          uname -m
+
+      - name: Show Swift version
+        run: swift --version
+
+      - name: Compile and run Swift
+        run: |
+          printf '%s\n' 'print("Hello from Swift on the macOS runner!")' > hello.swift
+          swiftc hello.swift -o hello
+          ./hello

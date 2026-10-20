@@ -1,0 +1,45 @@
+name: 08 - Matrix Build
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  matrix-test:
+    name: ${{ matrix.os }} - Node ${{ matrix.node }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+        node:
+          - '22'
+          - '24'
+
+    steps:
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node }}
+          package-manager-cache: false
+
+      - name: Show matrix combination
+        shell: bash
+        env:
+          STUDENT: ${{ github.actor }}
+          SELECTED_OS: ${{ matrix.os }}
+          SELECTED_NODE: ${{ matrix.node }}
+        run: |
+          echo "Student: $STUDENT"
+          echo "Operating system: $SELECTED_OS"
+          echo "Node.js version selected: $SELECTED_NODE"
+          node --version
+
+      - name: Run a small test
+        run: node -e "const assert = require('node:assert/strict'); assert.equal(2 + 3, 5); console.log('Test passed on ' + process.platform + ' with ' + process.version);"

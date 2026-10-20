@@ -1,0 +1,49 @@
+name: 04 - Contexts and Conditions
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  COURSE: GitHub Actions
+
+jobs:
+  inspect-contexts:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Show context information
+        env:
+          STUDENT: ${{ github.actor }}
+          EVENT: ${{ github.event_name }}
+          SYSTEM: ${{ runner.os }}
+          REPOSITORY: ${{ github.repository }}
+          STUDENT_VARIABLE: ${{ vars.STUDENT_NAME }}
+        run: |
+          echo "GitHub username: $STUDENT"
+          echo "Event: $EVENT"
+          echo "Runner OS: $SYSTEM"
+          echo "Repository: $REPOSITORY"
+          echo "Course environment variable: $COURSE"
+          echo "Repository variable: $STUDENT_VARIABLE"
+
+      - name: Run when course contains GitHub
+        if: contains(env.COURSE, 'GitHub')
+        run: echo "The course name contains GitHub."
+
+      - name: Run after success
+        if: success()
+        run: echo "The preceding steps succeeded."
+
+      - name: Run after failure
+        if: failure()
+        run: echo "An earlier step failed."
+
+      - name: Always show completion
+        if: always()
+        run: echo "This step runs regardless of earlier success or failure."

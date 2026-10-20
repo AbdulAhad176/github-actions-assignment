@@ -1,0 +1,34 @@
+name: 07 - Self Hosted Runner
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  local-windows-job:
+    runs-on: [self-hosted, Windows, assignment]
+    timeout-minutes: 5
+
+    steps:
+      - name: Show self-hosted runner information
+        shell: powershell
+        env:
+          STUDENT: ${{ github.actor }}
+          RUNNER_NAME: ${{ runner.name }}
+          RUNNER_OS: ${{ runner.os }}
+          RUNNER_ARCH: ${{ runner.arch }}
+        run: |
+          Write-Output "Student: $env:STUDENT"
+          Write-Output "Runner name: $env:RUNNER_NAME"
+          Write-Output "Runner OS: $env:RUNNER_OS"
+          Write-Output "Runner architecture: $env:RUNNER_ARCH"
+          Write-Output "Computer name: $env:COMPUTERNAME"
+
+      - name: Run assignment task locally
+        shell: powershell
+        run: |
+          Write-Output "This job is running on my self-hosted Windows computer."
+          Get-Date
+          Write-Output "Self-hosted runner task completed successfully."

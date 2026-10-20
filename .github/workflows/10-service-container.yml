@@ -1,0 +1,61 @@
+name: 10 - PostgreSQL Service Container
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  database-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: assignment-demo-password
+          POSTGRES_DB: assignment_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d assignment_db"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Show running service container
+        env:
+          STUDENT: ${{ github.actor }}
+        run: |
+          echo "Student: $STUDENT"
+          docker ps --format "table {{.ID}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}"
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Run database integration test
+        env:
+          PGHOST: localhost
+          PGPORT: '5432'
+          PGUSER: postgres
+          PGPASSWORD: assignment-demo-password
+          PGDATABASE: assignment_db
+        run: |
+          psql -v ON_ERROR_STOP=1 <<'SQL'
+          SELECT version();
+          CREATE TABLE students (
+            id INTEGER PRIMARY KEY,
+            name TEXT NOT NULL
+          );
+          INSERT INTO students VALUES (1, 'Abdul Ahad');
+          SELECT * FROM students;
+          SQL
+
+          count=$(psql -tAc "SELECT COUNT(*) FROM students;")
+          test "$count" = "1"
+          echo "Database integration test passed."

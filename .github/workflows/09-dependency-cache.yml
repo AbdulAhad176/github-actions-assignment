@@ -1,0 +1,52 @@
+name: 09 - Dependency Cache
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cache-demo:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Restore dependency cache
+        id: pip-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-python312-pip-demo-v1-${{ hashFiles('requirements-cache.txt') }}
+
+      - name: Show cache result
+        env:
+          CACHE_HIT: ${{ steps.pip-cache.outputs.cache-hit }}
+          STUDENT: ${{ github.actor }}
+        run: |
+          echo "Student: $STUDENT"
+          if [ "$CACHE_HIT" = "true" ]; then
+            echo "CACHE HIT: dependency cache restored."
+          else
+            echo "CACHE MISS: dependencies will be downloaded."
+          fi
+
+      - name: Install dependencies
+        run: python -m pip install --cache-dir "$HOME/.cache/pip" -r requirements-cache.txt
+
+      - name: Test installed dependency
+        run: python -c "import requests; print('Requests installed successfully:', requests.__version__)"
+
+      - name: Save dependency cache
+        if: steps.pip-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ steps.pip-cache.outputs.cache-primary-key }}
